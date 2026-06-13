@@ -3,330 +3,1148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light">
-    <title>Pudu Digital LLC — Simple, powerful mobile apps</title>
-    <meta name="description" content="Pudu Digital LLC develops and publishes iOS apps for creators and explorers.">
+    <meta name="color-scheme" content="dark">
+    <title>Pudu Digital — Tiny, mighty iOS apps</title>
+    <meta name="description" content="Pudu Digital LLC is a tiny app studio making small, mighty iOS apps for creators and explorers.">
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            color-scheme: light;
-            --text: #1d1d1f;
-            --body: #424245;
-            --muted: #86868b;
-            --link: #0066cc;
-            --border: #e5e5e5;
-            --surface: #f5f5f7;
+            color-scheme: dark;
+            --bg: #060a08;
+            --bg-soft: #0a100d;
+            --ink: #eef5f0;
+            --body: #aab8b0;
+            --muted: #5f6e66;
+            --accent: #7cffb2;
+            --accent2: #ffbf8a;
+            --accent3: #c8aaff;
+            --accent-dim: rgba(124, 255, 178, 0.14);
+            --line: rgba(238, 245, 240, 0.08);
+            --font-display: "Clash Display", "Segoe UI", system-ui, sans-serif;
+            --font-body: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         html { scroll-behavior: smooth; }
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text);
-            background: #fff;
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--ink);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        a { color: var(--link); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        ::selection { background: var(--accent); color: #04140b; }
 
-        /* Header */
+        a { color: var(--accent); text-decoration: none; }
+
+        /* ---------- WebGL canvas ---------- */
+        #webgl {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .grain {
+            position: fixed;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            animation: grain 9s steps(10) infinite;
+        }
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -8%); }
+            30% { transform: translate(4%, -3%); }
+            50% { transform: translate(-7%, 6%); }
+            70% { transform: translate(6%, 4%); }
+            90% { transform: translate(-3%, 7%); }
+        }
+
+        .page { position: relative; z-index: 2; }
+
+        /* ---------- Custom cursor ---------- */
+        .cursor-dot, .cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-dot {
+            width: 6px; height: 6px;
+            background: var(--accent);
+        }
+        .cursor-ring {
+            width: 36px; height: 36px;
+            border: 1px solid rgba(124, 255, 178, 0.45);
+            transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+        }
+        body.cursor-hover .cursor-ring {
+            width: 64px; height: 64px;
+            border-color: rgba(124, 255, 178, 0.9);
+            background: rgba(124, 255, 178, 0.08);
+        }
+        @media (hover: none), (pointer: coarse) {
+            .cursor-dot, .cursor-ring { display: none; }
+        }
+
+        /* ---------- Header ---------- */
         header.site-header {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid var(--border);
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1rem 0;
+            border-bottom: 1px solid transparent;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+        header.site-header.scrolled {
+            background: rgba(6, 10, 8, 0.7);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border-bottom-color: var(--line);
         }
         .nav-wrap {
-            max-width: 1100px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0.75rem 1.5rem;
+            padding: 0 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
-        }
-        .nav-wrap .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
         }
         .nav-wrap .logo img {
-            height: 72px;
+            height: 52px;
             width: auto;
             display: block;
+            filter: invert(1) brightness(1.6);
         }
         nav.primary ul {
             display: flex;
-            gap: 1.75rem;
+            gap: 2.25rem;
             list-style: none;
         }
         nav.primary a {
-            color: var(--text);
-            font-size: 0.95rem;
+            color: var(--body);
+            font-size: 0.85rem;
             font-weight: 500;
-            text-decoration: none;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            position: relative;
+            transition: color 0.3s ease;
         }
-        nav.primary a:hover { color: var(--link); text-decoration: none; }
-
-        main { flex: 1; }
-
-        section { padding: 5rem 1.5rem; }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
+        nav.primary a::after {
+            content: "";
+            position: absolute;
+            left: 0; bottom: -6px;
+            width: 100%;
+            height: 1px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        nav.primary a:hover { color: var(--ink); }
+        nav.primary a:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
         }
 
-        /* Hero */
+        /* ---------- Hero ---------- */
         .hero {
-            padding: 7rem 1.5rem 6rem;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            background: linear-gradient(180deg, #fff 0%, var(--surface) 100%);
+            padding: 7rem 1.5rem 4rem;
+            position: relative;
+        }
+        .hero .eyebrow {
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .hero .eyebrow::before, .hero .eyebrow::after {
+            content: "";
+            width: 36px;
+            height: 1px;
+            background: var(--accent-dim);
         }
         .hero h1 {
-            font-size: clamp(2.25rem, 5vw, 3.75rem);
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 11vw, 9.5rem);
+            font-weight: 600;
+            line-height: 0.95;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+        .hero h1 .line {
+            display: block;
+            overflow: hidden;
+            padding: 0.06em 0.1em;
+            margin: -0.06em -0.1em;
+        }
+        .hero h1 .char { display: inline-block; will-change: transform; }
+        .hero h1 .line:nth-child(2) {
+            color: transparent;
+            -webkit-text-stroke: 1.5px rgba(238, 245, 240, 0.85);
+        }
+        .hero .squiggle {
+            width: clamp(140px, 22vw, 260px);
+            height: auto;
+            color: var(--accent2);
+            margin-top: 1.4rem;
+            overflow: visible;
+        }
+        .hero .sparkle {
+            position: absolute;
+            font-size: 1.1rem;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .hero .sparkle.s1 { top: 24%; left: 16%; color: var(--accent2); font-size: 1.4rem; }
+        .hero .sparkle.s2 { top: 32%; right: 14%; color: var(--accent3); }
+        .hero .sparkle.s3 { bottom: 30%; left: 22%; color: var(--accent3); font-size: 0.9rem; }
+        .hero .sparkle.s4 { top: 18%; right: 30%; color: var(--accent); font-size: 0.8rem; }
+        .hero .sparkle.s5 { bottom: 24%; right: 24%; color: var(--accent2); font-size: 1.2rem; }
+        .hero p.tagline {
+            margin-top: 2.5rem;
+            font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+            color: var(--body);
+            max-width: 540px;
+            font-weight: 400;
+        }
+        .hero p.tagline strong { color: var(--ink); font-weight: 500; }
+        .hero .hero-cta {
+            margin-top: 3rem;
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 1.05rem 2.4rem;
+            border-radius: 999px;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: color 0.4s ease, border-color 0.4s ease;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #04140b;
+        }
+        .btn-primary span { position: relative; z-index: 1; }
+        .btn-primary::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            border-radius: inherit;
+            transform: translateY(101%);
+            transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .btn-primary:hover::before { transform: translateY(0); }
+        .btn-ghost {
+            border: 1px solid rgba(238, 245, 240, 0.25);
+            color: var(--ink);
+        }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--muted);
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+        .scroll-hint .wheel {
+            width: 1px;
+            height: 44px;
+            background: linear-gradient(var(--accent), transparent);
+            animation: drop 1.8s ease-in-out infinite;
+        }
+        @keyframes drop {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            51% { transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        /* ---------- Marquee ---------- */
+        .marquee {
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            padding: 1.4rem 0;
+            overflow: hidden;
+            white-space: nowrap;
+            background: rgba(6, 10, 8, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .marquee-track { display: inline-flex; will-change: transform; }
+        .marquee span {
+            font-family: var(--font-display);
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            padding-right: 1.5rem;
+        }
+        .marquee span em {
+            font-style: normal;
+            color: var(--accent);
+            padding-right: 1.5rem;
+        }
+        .marquee span:nth-child(3n + 2) em { color: var(--accent2); }
+        .marquee span:nth-child(3n) em { color: var(--accent3); }
+
+        /* ---------- Shared section bits ---------- */
+        section { position: relative; }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+        }
+        .kicker {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+        .section-head h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 4.5rem);
             font-weight: 600;
             letter-spacing: -0.02em;
-            line-height: 1.1;
-            color: var(--text);
-            margin-bottom: 1.25rem;
-        }
-        .hero p {
-            font-size: clamp(1.1rem, 2vw, 1.4rem);
-            color: var(--body);
-            max-width: 640px;
-            margin: 0 auto;
-            line-height: 1.5;
+            line-height: 1.02;
+            text-transform: uppercase;
         }
 
-        /* Section heading */
-        .section-heading {
-            font-size: clamp(1.75rem, 3vw, 2.5rem);
-            font-weight: 600;
-            letter-spacing: -0.015em;
-            color: var(--text);
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        /* Apps */
-        .apps {
-            background: #fff;
-        }
+        /* ---------- Apps ---------- */
+        .apps { padding: 9rem 0; }
         .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
             gap: 1.5rem;
         }
         .app-card {
-            background: var(--surface);
-            border-radius: 18px;
-            padding: 2.25rem 2rem;
+            position: relative;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            background: linear-gradient(160deg, rgba(238, 245, 240, 0.04), rgba(238, 245, 240, 0.01));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.4s ease;
+            will-change: transform;
         }
-        .app-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        .app-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 255, 178, 0.08), transparent 45%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .app-card:hover { border-color: rgba(124, 255, 178, 0.35); }
+        .app-card:hover::before { opacity: 1; }
+        .app-card .index {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            margin-bottom: 2.5rem;
         }
         .app-card h3 {
-            font-size: 1.5rem;
+            font-family: var(--font-display);
+            font-size: clamp(1.7rem, 3vw, 2.4rem);
             font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.75rem;
+            line-height: 1.08;
             letter-spacing: -0.01em;
+            margin-bottom: 1rem;
+        }
+        .app-card .tag {
+            display: inline-block;
+            align-self: flex-start;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(124, 255, 178, 0.3);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+            margin-bottom: 1.5rem;
+            transform: rotate(-2deg);
+        }
+        .app-card .tag.peach {
+            color: var(--accent2);
+            border-color: rgba(255, 191, 138, 0.35);
+            transform: rotate(1.5deg);
         }
         .app-card p {
             color: var(--body);
-            font-size: 1rem;
-            line-height: 1.55;
-            margin-bottom: 1.75rem;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            margin-bottom: 2.5rem;
             flex: 1;
         }
-        .app-card .badge-link {
+        .app-card .badge-link { display: inline-block; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .app-card .badge-link:hover { transform: translateY(-2px); opacity: 0.85; }
+        .app-card .badge-link img { height: 50px; width: auto; display: block; }
+
+        /* ---------- About ---------- */
+        .about { padding: 10rem 0; }
+        .about .statement {
+            font-family: var(--font-display);
+            font-size: clamp(1.7rem, 4.2vw, 3.6rem);
+            font-weight: 500;
+            line-height: 1.22;
+            letter-spacing: -0.01em;
+            max-width: 1100px;
+        }
+        .about .statement .word {
+            color: rgba(238, 245, 240, 0.16);
             display: inline-block;
-            text-decoration: none;
         }
-        .app-card .badge-link:hover { text-decoration: none; }
-        .app-card .badge-link img {
-            height: 48px;
-            width: auto;
+        .about .statement .word.hl { color: rgba(124, 255, 178, 0.16); }
+        .about .pillars {
+            margin-top: 5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .about .pillar {
+            background: linear-gradient(160deg, rgba(238, 245, 240, 0.04), rgba(238, 245, 240, 0.01));
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 2.25rem 2rem;
+        }
+        .about .pillar .num {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--accent);
             display: block;
+            margin-bottom: 0.75rem;
         }
+        .about .pillar:nth-child(2) .num { color: var(--accent2); }
+        .about .pillar:nth-child(3) .num { color: var(--accent3); }
+        .about .pillar h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+        }
+        .about .pillar p { color: var(--muted); font-size: 0.92rem; line-height: 1.55; }
 
-        /* About */
-        .about {
-            background: var(--surface);
+        /* ---------- Support / Contact ---------- */
+        .support { padding: 10rem 0 9rem; text-align: center; }
+        .support .kicker {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 2rem;
         }
-        .about .container {
-            max-width: 760px;
-            text-align: center;
+        .support .big-mail {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 7vw, 6.5rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            display: inline-block;
+            position: relative;
+            line-height: 1.1;
+            transition: color 0.4s ease;
         }
-        .about p {
-            font-size: 1.15rem;
-            line-height: 1.65;
+        .support .big-mail::after {
+            content: "";
+            position: absolute;
+            left: 0; bottom: 0.02em;
+            width: 100%;
+            height: 0.045em;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .support .big-mail:hover { color: var(--accent); }
+        .support .big-mail:hover::after { transform: scaleX(1); transform-origin: left; }
+        .support .sub {
+            margin-top: 2rem;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+        .support .sub a {
             color: var(--body);
+            border-bottom: 1px solid var(--line);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
+        .support .sub a:hover { color: var(--accent); border-color: var(--accent); }
 
-        /* Support */
-        .support {
-            background: #fff;
-        }
-        .support .container {
-            max-width: 680px;
-            text-align: center;
-        }
-        .support p {
-            font-size: 1.1rem;
-            line-height: 1.65;
-            color: var(--body);
-            margin-bottom: 1rem;
-        }
-        .support a { color: var(--link); }
-
-        /* Footer */
+        /* ---------- Footer ---------- */
         footer.site-footer {
-            border-top: 1px solid var(--border);
-            background: var(--surface);
-            padding: 2.25rem 1.5rem;
+            border-top: 1px solid var(--line);
+            padding: 3rem 0;
+            background: rgba(6, 10, 8, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         .footer-wrap {
-            max-width: 1100px;
+            max-width: 1280px;
             margin: 0 auto;
+            padding: 0 2rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
-            font-size: 0.875rem;
+            gap: 1.25rem;
+            font-size: 0.85rem;
             color: var(--muted);
         }
         .footer-wrap nav ul {
             display: flex;
-            gap: 1.5rem;
+            gap: 1.75rem;
             list-style: none;
             flex-wrap: wrap;
         }
         .footer-wrap nav a {
             color: var(--muted);
-            text-decoration: none;
+            transition: color 0.3s ease;
         }
-        .footer-wrap nav a:hover { color: var(--text); }
+        .footer-wrap nav a:hover { color: var(--accent); }
 
-        /* Mobile */
+        /* ---------- Reveal helpers (JS sets initial state) ---------- */
+        .reveal { will-change: transform, opacity; }
+
+        /* ---------- Mobile ---------- */
         @media (max-width: 640px) {
-            .nav-wrap {
-                padding: 0.625rem 1rem;
-                flex-wrap: wrap;
-            }
-            .nav-wrap .logo img { height: 56px; }
-            nav.primary ul {
-                gap: 1.1rem;
-            }
-            nav.primary a { font-size: 0.9rem; }
-            .hero { padding: 4.5rem 1.25rem 4rem; }
-            section { padding: 3.5rem 1.25rem; }
-            .app-card { padding: 1.75rem 1.5rem; }
-            .footer-wrap {
-                flex-direction: column;
-                text-align: center;
-            }
+            .nav-wrap { padding: 0 1.25rem; }
+            .nav-wrap .logo img { height: 42px; }
+            nav.primary ul { gap: 1.1rem; }
+            nav.primary a { font-size: 0.72rem; letter-spacing: 0.1em; }
+            .container { padding: 0 1.25rem; }
+            .apps, .about, .support { padding: 5.5rem 0; }
+            .app-card { padding: 2.25rem 1.75rem; }
+            .section-head { margin-bottom: 2.5rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .grain, .scroll-hint .wheel { animation: none; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
+    <canvas id="webgl" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
     <header class="site-header">
         <div class="nav-wrap">
-            <a href="#" class="logo" aria-label="Pudu Digital home">
+            <a href="#home" class="logo" aria-label="Pudu Digital home" data-hover>
                 <img src="logo.png" alt="Pudu Digital">
             </a>
             <nav class="primary" aria-label="Primary">
                 <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#apps">Apps</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#support">Support</a></li>
+                    <li><a href="#apps" data-hover>Apps</a></li>
+                    <li><a href="#about" data-hover>About</a></li>
+                    <li><a href="#support" data-hover>Support</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main>
-        <section id="home" class="hero">
-            <h1>Simple, powerful mobile apps</h1>
-            <p>Pudu Digital LLC develops and publishes iOS apps for creators and explorers.</p>
-        </section>
-
-        <section id="apps" class="apps">
-            <div class="container">
-                <h2 class="section-heading">Our Apps</h2>
-                <div class="app-grid">
-                    <article class="app-card">
-                        <h3>Voice Teleprompter PRO</h3>
-                        <p>Professional voice-activated teleprompter for iPad. Your script scrolls automatically with your voice.</p>
-                        <a class="badge-link"
-                           href="https://apps.apple.com/us/app/voice-teleprompter-pro/id1084234301"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           aria-label="Download Voice Teleprompter PRO on the App Store">
-                            <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?releaseDate=1456531200"
-                                 alt="Download on the App Store">
-                        </a>
-                    </article>
-
-                    <article class="app-card">
-                        <h3>Voice Teleprompter Lite</h3>
-                        <p>Free voice-activated teleprompter for iPad. Try Voice Teleprompter with unlimited basic scripts.</p>
-                        <a class="badge-link"
-                           href="https://apps.apple.com/us/app/voice-teleprompter-lite-speech-prompter-with-smart/id1090183097"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           aria-label="Download Voice Teleprompter Lite on the App Store">
-                            <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?releaseDate=1461888000"
-                                 alt="Download on the App Store">
-                        </a>
-                    </article>
+    <div class="page">
+        <main>
+            <section id="home" class="hero">
+                <span class="sparkle s1" aria-hidden="true">✦</span>
+                <span class="sparkle s2" aria-hidden="true">✦</span>
+                <span class="sparkle s3" aria-hidden="true">✧</span>
+                <span class="sparkle s4" aria-hidden="true">✦</span>
+                <span class="sparkle s5" aria-hidden="true">✧</span>
+                <p class="eyebrow reveal-hero">Pudu Digital · a tiny app studio</p>
+                <h1 aria-label="Tiny. Mighty. Apps.">
+                    <span class="line" aria-hidden="true">Tiny.</span>
+                    <span class="line" aria-hidden="true">Mighty.</span>
+                    <span class="line" aria-hidden="true">Apps.</span>
+                </h1>
+                <svg class="squiggle reveal-hero" viewBox="0 0 240 20" aria-hidden="true">
+                    <path d="M3 12 C 20 4, 40 20, 60 12 S 100 4, 120 12 S 160 20, 180 12 S 220 4, 237 10"
+                          fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                <p class="tagline reveal-hero">Named after the world's smallest deer, we make <strong>small, mighty iOS apps</strong> for creators &amp; explorers — tools that just work.</p>
+                <div class="hero-cta reveal-hero">
+                    <a class="btn btn-primary" href="#apps" data-hover><span>Meet the apps</span></a>
+                    <a class="btn btn-ghost" href="mailto:hello@pudu.digital" data-hover>Say hi</a>
                 </div>
-            </div>
-        </section>
+                <div class="scroll-hint" aria-hidden="true">
+                    <span>Wander down</span>
+                    <div class="wheel"></div>
+                </div>
+            </section>
 
-        <section id="about" class="about">
-            <div class="container">
-                <h2 class="section-heading">About Pudu Digital</h2>
-                <p>Pudu Digital LLC is a mobile app company focused on building and maintaining simple, high-quality iOS apps. We believe great tools should just work. No subscriptions, no complexity.</p>
+            <div class="marquee" aria-hidden="true">
+                <div class="marquee-track"></div>
             </div>
-        </section>
 
-        <section id="support" class="support">
-            <div class="container">
-                <h2 class="section-heading">Support</h2>
-                <p>For support with any of our apps, reach out to us at <a href="mailto:hello@pudu.digital">hello@pudu.digital</a>.</p>
-                <p>You can also review our <a href="/privacy">Privacy Policy</a>.</p>
+            <section id="apps" class="apps">
+                <div class="container">
+                    <div class="section-head">
+                        <div>
+                            <span class="kicker reveal">/ 01 — The herd</span>
+                            <h2 class="reveal">Meet the apps</h2>
+                        </div>
+                    </div>
+                    <div class="app-grid">
+                        <article class="app-card reveal" data-tilt>
+                            <span class="index">— 01</span>
+                            <span class="tag">iPad · Pro</span>
+                            <h3>Voice Teleprompter PRO</h3>
+                            <p>Professional voice-activated teleprompter for iPad. Your script scrolls automatically with your voice — hands free, take after take.</p>
+                            <a class="badge-link"
+                               href="https://apps.apple.com/us/app/voice-teleprompter-pro/id1084234301"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Download Voice Teleprompter PRO on the App Store"
+                               data-hover>
+                                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?releaseDate=1456531200"
+                                     alt="Download on the App Store">
+                            </a>
+                        </article>
+
+                        <article class="app-card reveal" data-tilt>
+                            <span class="index">— 02</span>
+                            <span class="tag peach">iPad · Free</span>
+                            <h3>Voice Teleprompter Lite</h3>
+                            <p>Free voice-activated teleprompter for iPad. Try Voice Teleprompter with unlimited basic scripts — upgrade whenever you're ready.</p>
+                            <a class="badge-link"
+                               href="https://apps.apple.com/us/app/voice-teleprompter-lite-speech-prompter-with-smart/id1090183097"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Download Voice Teleprompter Lite on the App Store"
+                               data-hover>
+                                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?releaseDate=1461888000"
+                                     alt="Download on the App Store">
+                            </a>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="about">
+                <div class="container">
+                    <span class="kicker reveal" style="display:block; margin-bottom:2.5rem;">/ 02 — Our story</span>
+                    <p class="statement" data-words>
+                        The pudú is <em>the world's smallest deer</em> — shy, sure-footed, surprisingly capable. We make apps the same way: <em>small, mighty,</em> and built to just work. No subscriptions, no clutter, no nonsense.
+                    </p>
+                    <div class="pillars">
+                        <div class="pillar reveal">
+                            <span class="num">01</span>
+                            <h4>Small by design</h4>
+                            <p>Every feature earns its place. If it doesn't help you, it doesn't ship.</p>
+                        </div>
+                        <div class="pillar reveal">
+                            <span class="num">02</span>
+                            <h4>Pay once, own it</h4>
+                            <p>No subscriptions. Our tools respect your wallet as much as your time.</p>
+                        </div>
+                        <div class="pillar reveal">
+                            <span class="num">03</span>
+                            <h4>Built to last</h4>
+                            <p>Maintained for the long haul — apps you can rely on, year after year.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="support" class="support">
+                <div class="container">
+                    <span class="kicker reveal">/ 03 — Say hi</span>
+                    <p class="reveal" style="color: var(--body); margin-bottom: 1.5rem;">Questions, ideas, or just curious about tiny deer? We read every email.</p>
+                    <a class="big-mail reveal" href="mailto:hello@pudu.digital" data-hover>hello@pudu.digital</a>
+                    <p class="sub reveal">You can also review our <a href="/privacy" data-hover>Privacy Policy</a>.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-wrap">
+                <div>&copy; 2026 Pudu Digital LLC · Made by the world's smallest app studio 🌿</div>
+                <nav aria-label="Footer">
+                    <ul>
+                        <li><a href="/privacy" data-hover>Privacy Policy</a></li>
+                        <li><a href="mailto:hello@pudu.digital" data-hover>Support</a></li>
+                        <li><a href="mailto:hello@pudu.digital" data-hover>Contact</a></li>
+                    </ul>
+                </nav>
             </div>
-        </section>
-    </main>
+        </footer>
+    </div>
 
-    <footer class="site-footer">
-        <div class="footer-wrap">
-            <div>&copy; 2026 Pudu Digital LLC. All rights reserved.</div>
-            <nav aria-label="Footer">
-                <ul>
-                    <li><a href="/privacy">Privacy Policy</a></li>
-                    <li><a href="mailto:hello@pudu.digital">Support</a></li>
-                    <li><a href="mailto:hello@pudu.digital">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* ================= Smooth scroll (Lenis) ================= */
+        let lenis = null;
+        if (!prefersReducedMotion && typeof Lenis !== 'undefined') {
+            lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+
+            document.querySelectorAll('a[href^="#"]').forEach((a) => {
+                a.addEventListener('click', (e) => {
+                    const target = document.querySelector(a.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        lenis.scrollTo(target, { offset: -20, duration: 1.4 });
+                    }
+                });
+            });
+        }
+
+        /* ================= Three.js scene ================= */
+        const canvas = document.getElementById('webgl');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+        const DPR = Math.min(window.devicePixelRatio, 2);
+        renderer.setPixelRatio(DPR);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x060a08, 0.055);
+
+        const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 2.4, 9);
+
+        /* --- Wave terrain of points --- */
+        const COLS = 130, ROWS = 90, SPACING = 0.42;
+        const count = COLS * ROWS;
+        const positions = new Float32Array(count * 3);
+        const scales = new Float32Array(count);
+        let i = 0;
+        for (let x = 0; x < COLS; x++) {
+            for (let z = 0; z < ROWS; z++) {
+                positions[i * 3]     = (x - COLS / 2) * SPACING;
+                positions[i * 3 + 1] = 0;
+                positions[i * 3 + 2] = (z - ROWS / 2) * SPACING;
+                scales[i] = 0.5 + Math.random();
+                i++;
+            }
+        }
+        const waveGeo = new THREE.BufferGeometry();
+        waveGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        waveGeo.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
+
+        const waveMat = new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            uniforms: {
+                uTime: { value: 0 },
+                uPixelRatio: { value: DPR },
+                uColorLow: { value: new THREE.Color(0x0d2b1c) },
+                uColorHigh: { value: new THREE.Color(0x7cffb2) },
+            },
+            vertexShader: `
+                uniform float uTime;
+                uniform float uPixelRatio;
+                attribute float aScale;
+                varying float vElev;
+                varying float vDist;
+                void main() {
+                    vec3 p = position;
+                    float e = sin(p.x * 0.32 + uTime * 0.55) * 0.5
+                            + sin(p.z * 0.28 - uTime * 0.38) * 0.5
+                            + sin((p.x + p.z) * 0.18 + uTime * 0.22) * 0.35;
+                    p.y += e;
+                    vElev = e;
+                    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+                    vDist = -mv.z;
+                    gl_Position = projectionMatrix * mv;
+                    gl_PointSize = 9.0 * aScale * uPixelRatio / vDist;
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColorLow;
+                uniform vec3 uColorHigh;
+                varying float vElev;
+                varying float vDist;
+                void main() {
+                    float d = distance(gl_PointCoord, vec2(0.5));
+                    float alpha = smoothstep(0.5, 0.05, d);
+                    float t = clamp((vElev + 1.3) / 2.6, 0.0, 1.0);
+                    vec3 color = mix(uColorLow, uColorHigh, t);
+                    float fade = smoothstep(34.0, 6.0, vDist);
+                    gl_FragColor = vec4(color, alpha * fade * 0.85);
+                }
+            `,
+        });
+        const wave = new THREE.Points(waveGeo, waveMat);
+        wave.position.y = -2.2;
+        scene.add(wave);
+
+        /* --- Fireflies --- */
+        const FLY_COUNT = 220;
+        const flyPos = new Float32Array(FLY_COUNT * 3);
+        const flySeed = new Float32Array(FLY_COUNT);
+        for (let f = 0; f < FLY_COUNT; f++) {
+            flyPos[f * 3]     = (Math.random() - 0.5) * 26;
+            flyPos[f * 3 + 1] = Math.random() * 9 - 1.5;
+            flyPos[f * 3 + 2] = (Math.random() - 0.5) * 22;
+            flySeed[f] = Math.random() * 100;
+        }
+        const flyGeo = new THREE.BufferGeometry();
+        flyGeo.setAttribute('position', new THREE.BufferAttribute(flyPos, 3));
+        flyGeo.setAttribute('aSeed', new THREE.BufferAttribute(flySeed, 1));
+
+        const flyMat = new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            uniforms: {
+                uTime: { value: 0 },
+                uPixelRatio: { value: DPR },
+            },
+            vertexShader: `
+                uniform float uTime;
+                uniform float uPixelRatio;
+                attribute float aSeed;
+                varying float vTwinkle;
+                varying vec3 vColor;
+                void main() {
+                    vec3 p = position;
+                    p.x += sin(uTime * 0.25 + aSeed) * 0.8;
+                    p.y += sin(uTime * 0.18 + aSeed * 2.1) * 0.6;
+                    p.z += cos(uTime * 0.21 + aSeed * 1.3) * 0.8;
+                    vTwinkle = 0.35 + 0.65 * (0.5 + 0.5 * sin(uTime * (0.8 + fract(aSeed) * 1.4) + aSeed * 7.0));
+                    float hue = fract(aSeed * 0.618);
+                    vec3 mint  = vec3(0.55, 1.0, 0.72);
+                    vec3 peach = vec3(1.0, 0.78, 0.56);
+                    vec3 lilac = vec3(0.80, 0.68, 1.0);
+                    vColor = hue < 0.6 ? mint : (hue < 0.82 ? peach : lilac);
+                    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+                    gl_Position = projectionMatrix * mv;
+                    gl_PointSize = (14.0 + fract(aSeed * 3.7) * 22.0) * uPixelRatio / -mv.z;
+                }
+            `,
+            fragmentShader: `
+                varying float vTwinkle;
+                varying vec3 vColor;
+                void main() {
+                    float d = distance(gl_PointCoord, vec2(0.5));
+                    float alpha = pow(smoothstep(0.5, 0.0, d), 2.2);
+                    gl_FragColor = vec4(vColor, alpha * vTwinkle * 0.9);
+                }
+            `,
+        });
+        const flies = new THREE.Points(flyGeo, flyMat);
+        scene.add(flies);
+
+        /* --- Mouse parallax + scroll-driven camera --- */
+        const pointer = { x: 0, y: 0 };
+        if (!isTouch) {
+            window.addEventListener('pointermove', (e) => {
+                pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+            });
+        }
+
+        const camTarget = { y: 2.4, rotX: -0.08, fogD: 0.055 };
+        gsap.to(camTarget, {
+            y: 0.9,
+            rotX: 0.12,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: document.body,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.2,
+            },
+        });
+
+        const clock = new THREE.Clock();
+        function render() {
+            const t = clock.getElapsedTime();
+            waveMat.uniforms.uTime.value = t;
+            flyMat.uniforms.uTime.value = t;
+
+            camera.position.y += (camTarget.y - camera.position.y) * 0.08;
+            camera.position.x += (pointer.x * 0.9 - camera.position.x) * 0.04;
+            camera.rotation.x = camTarget.rotX - pointer.y * 0.03;
+            camera.rotation.y = -pointer.x * 0.04;
+
+            renderer.render(scene, camera);
+        }
+
+        if (prefersReducedMotion) {
+            render(); // single static frame
+        } else {
+            renderer.setAnimationLoop(render);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (prefersReducedMotion) render();
+        });
+
+        /* ================= GSAP UI animations ================= */
+
+        /* Split hero lines into chars */
+        document.querySelectorAll('.hero h1 .line').forEach((line) => {
+            const text = line.textContent;
+            line.textContent = '';
+            for (const ch of text) {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = ch;
+                line.appendChild(span);
+            }
+        });
+
+        if (!prefersReducedMotion) {
+            const intro = gsap.timeline({ defaults: { ease: 'power4.out' } });
+            intro
+                .from('.site-header', { yPercent: -120, duration: 1, ease: 'power3.out', clearProps: 'transform' })
+                .from('.hero h1 .char', {
+                    yPercent: 130,
+                    rotate: 9,
+                    duration: 1.1,
+                    ease: 'back.out(1.6)',
+                    stagger: { each: 0.03, from: 'start' },
+                }, 0.15)
+                .from('.reveal-hero', {
+                    y: 40,
+                    autoAlpha: 0,
+                    duration: 1,
+                    stagger: 0.12,
+                }, 0.7)
+                .from('.scroll-hint', { autoAlpha: 0, duration: 1 }, 1.2);
+
+            /* Squiggle draws itself in */
+            const squiggle = document.querySelector('.squiggle path');
+            if (squiggle) {
+                const len = squiggle.getTotalLength();
+                gsap.set(squiggle, { strokeDasharray: len, strokeDashoffset: len });
+                intro.to(squiggle, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 1.0);
+            }
+
+            /* Sparkles drift and twinkle */
+            document.querySelectorAll('.hero .sparkle').forEach((s, idx) => {
+                gsap.to(s, {
+                    y: gsap.utils.random(-22, 22),
+                    x: gsap.utils.random(-14, 14),
+                    rotation: gsap.utils.random(-60, 60),
+                    duration: gsap.utils.random(2.5, 4.5),
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'sine.inOut',
+                    delay: idx * 0.3,
+                });
+                gsap.to(s, {
+                    opacity: 0.25,
+                    duration: gsap.utils.random(0.8, 1.6),
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'sine.inOut',
+                    delay: idx * 0.45,
+                });
+            });
+
+            /* Generic scroll reveals — cards get a playful overshoot */
+            gsap.utils.toArray('.reveal').forEach((el) => {
+                const playful = el.classList.contains('app-card') || el.classList.contains('pillar');
+                gsap.from(el, {
+                    y: playful ? 70 : 60,
+                    rotation: playful ? gsap.utils.random(-2, 2) : 0,
+                    autoAlpha: 0,
+                    duration: playful ? 1.2 : 1.1,
+                    ease: playful ? 'back.out(1.3)' : 'power3.out',
+                    scrollTrigger: { trigger: el, start: 'top 88%' },
+                });
+            });
+
+            /* Hero drifts up + fades as you scroll past */
+            gsap.to('.hero', {
+                yPercent: -12,
+                autoAlpha: 0.25,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true,
+                },
+            });
+        }
+
+        /* About statement: word-by-word color scrub */
+        const statement = document.querySelector('[data-words]');
+        if (statement) {
+            const parts = statement.innerHTML.split(/(<em>.*?<\/em>)/g);
+            statement.innerHTML = parts.map((part) => {
+                if (part.startsWith('<em>')) {
+                    const inner = part.replace(/<\/?em>/g, '');
+                    return inner.split(' ').map(w => `<span class="word hl">${w}</span>`).join(' ');
+                }
+                return part.split(' ').filter(Boolean).map(w => `<span class="word">${w}</span>`).join(' ');
+            }).join(' ');
+
+            const words = statement.querySelectorAll('.word');
+            if (prefersReducedMotion) {
+                words.forEach(w => w.style.color = w.classList.contains('hl') ? 'var(--accent)' : 'var(--ink)');
+            } else {
+                gsap.to(words, {
+                    color: (idx, el) => el.classList.contains('hl') ? '#7cffb2' : '#eef5f0',
+                    stagger: 0.05,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: statement,
+                        start: 'top 80%',
+                        end: 'bottom 45%',
+                        scrub: true,
+                    },
+                });
+            }
+        }
+
+        /* Marquee */
+        const track = document.querySelector('.marquee-track');
+        if (track) {
+            const phrase = '<span>Tiny but mighty <em>✦</em></span><span>Voice Teleprompter <em>✦</em></span><span>Made for iPad <em>✦</em></span><span>No subscriptions <em>✦</em></span><span>Pay once, own it <em>✦</em></span>';
+            track.innerHTML = phrase.repeat(4);
+            if (!prefersReducedMotion) {
+                gsap.to(track, { xPercent: -50, duration: 28, ease: 'none', repeat: -1 });
+            }
+        }
+
+        /* Header background on scroll */
+        ScrollTrigger.create({
+            start: 60,
+            onUpdate: (self) => {
+                document.querySelector('.site-header').classList.toggle('scrolled', self.scroll() > 60);
+            },
+        });
+
+        /* App card tilt + spotlight */
+        if (!isTouch && !prefersReducedMotion) {
+            document.querySelectorAll('[data-tilt]').forEach((card) => {
+                const setRX = gsap.quickTo(card, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+                const setRY = gsap.quickTo(card, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+                gsap.set(card, { transformPerspective: 900 });
+                card.addEventListener('pointermove', (e) => {
+                    const r = card.getBoundingClientRect();
+                    const px = (e.clientX - r.left) / r.width;
+                    const py = (e.clientY - r.top) / r.height;
+                    card.style.setProperty('--mx', `${px * 100}%`);
+                    card.style.setProperty('--my', `${py * 100}%`);
+                    setRX((0.5 - py) * 6);
+                    setRY((px - 0.5) * 6);
+                });
+                card.addEventListener('pointerleave', () => { setRX(0); setRY(0); });
+            });
+        }
+
+        /* The pudu hops when you click it */
+        const logoLink = document.querySelector('.logo');
+        const logoImg = document.querySelector('.logo img');
+        if (logoLink && logoImg && !prefersReducedMotion) {
+            let hopping = false;
+            logoLink.addEventListener('click', () => {
+                if (hopping) return;
+                hopping = true;
+                gsap.timeline({ onComplete: () => { hopping = false; } })
+                    .to(logoImg, { scaleY: 0.82, scaleX: 1.12, duration: 0.12, transformOrigin: '50% 100%', ease: 'power2.out' })
+                    .to(logoImg, { y: -18, scaleY: 1.06, scaleX: 0.96, duration: 0.22, ease: 'power2.out' })
+                    .to(logoImg, { y: 0, scaleY: 1, scaleX: 1, duration: 0.5, ease: 'bounce.out' });
+            });
+        }
+
+        /* Custom cursor */
+        if (!isTouch) {
+            const dot = document.querySelector('.cursor-dot');
+            const ring = document.querySelector('.cursor-ring');
+            const dotX = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power2.out' });
+            const dotY = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power2.out' });
+            const ringX = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3.out' });
+            const ringY = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3.out' });
+            window.addEventListener('pointermove', (e) => {
+                dotX(e.clientX); dotY(e.clientY);
+                ringX(e.clientX); ringY(e.clientY);
+            });
+            document.querySelectorAll('a, button, [data-hover]').forEach((el) => {
+                el.addEventListener('pointerenter', () => document.body.classList.add('cursor-hover'));
+                el.addEventListener('pointerleave', () => document.body.classList.remove('cursor-hover'));
+            });
+        }
+    </script>
 </body>
 </html>
