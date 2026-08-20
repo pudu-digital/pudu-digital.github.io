@@ -203,15 +203,15 @@
     <main>
         <span class="page-kicker">/ Legal</span>
         <h1>Privacy Policy</h1>
-        <span class="effective-date">Effective date: August 3, 2026</span>
+        <span class="effective-date">Effective date: August 19, 2026</span>
 
         <p class="intro">This privacy policy applies to <strong>Voice Teleprompter PRO</strong> and <strong>Voice Teleprompter Lite</strong> (collectively, "the App"), published by <strong>Pudu Digital LLC</strong> ("we", "us", or "our"). It is provided in accordance with the <a href="https://developer.apple.com/app-store/app-privacy-details/">Apple App Store privacy requirements</a>.</p>
 
         <h2>Data Collection</h2>
-        <p>Apple defines "collect" as transmitting data off the device in a way that allows the developer or third parties to access it. <strong>The App does not collect any data by this definition.</strong> All data accessed by the App remains on your device and is never transmitted to any server.</p>
+        <p><strong>Voice Teleprompter Lite does not transmit scripts off your device.</strong> Voice Teleprompter PRO includes Automatic iCloud Sync. When that feature is enabled, PRO sends your script content and sync metadata to your private CloudKit database hosted by Apple so your scripts remain available across your Apple devices and after reinstalling the App.</p>
+        <p>No script content is sent to Pudu Digital servers. We do not use scripts for analytics, advertising, marketing, or tracking.</p>
 
-        <h3>Data accessed on-device only</h3>
-        <p>The App accesses the following data, processed and stored entirely on your device:</p>
+        <h3>Data the App accesses</h3>
         <table>
             <tr>
                 <th>Apple Data Type</th>
@@ -226,10 +226,15 @@
             <tr>
                 <td><strong>Other User Content</strong><br>(User Content)</td>
                 <td>Script text entered by the user</td>
-                <td>Stored locally on your device so you can create, edit, and reuse teleprompter scripts. <strong>Never transmitted off-device.</strong></td>
+                <td>Stored locally so you can create, edit, and reuse scripts. Lite keeps scripts on-device. PRO also stores scripts in your private CloudKit database when Automatic iCloud Sync is enabled.</td>
+            </tr>
+            <tr>
+                <td><strong>User ID</strong><br>(Identifier)</td>
+                <td>An account-scoped CloudKit record identifier in PRO</td>
+                <td>Hashed on-device and used only to detect when the signed-in iCloud account changes. The raw identifier is not stored or sent to Pudu Digital.</td>
             </tr>
         </table>
-        <p>Per Apple's guidance: "Data that is processed only on device is not 'collected' and does not need to be disclosed." Neither of the above data types leaves your device.</p>
+        <p>Microphone audio and the CloudKit account identifier are processed on-device. PRO's synced script content is disclosed in App Store privacy details as <strong>Other User Content</strong>, linked to the user's iCloud account, used for <strong>App Functionality</strong>, and not used for tracking.</p>
 
         <h2>Data Types Not Accessed</h2>
         <p>The App does <strong>not</strong> access any of the following:</p>
@@ -242,26 +247,24 @@
             <li>Contacts</li>
             <li>Browsing History</li>
             <li>Search History</li>
-            <li>Identifiers (user ID, device ID)</li>
             <li>Purchases</li>
             <li>Usage Data (product interaction, advertising data)</li>
             <li>Diagnostics (crash data, performance data)</li>
         </ul>
 
         <h2>Data Use Purposes</h2>
-        <p>Since no data is collected (transmitted off-device), no data use purposes apply. For transparency:</p>
         <table>
             <tr><th>Purpose</th><th>Applies?</th></tr>
             <tr><td>Third-Party Advertising</td><td>No</td></tr>
             <tr><td>Developer's Advertising or Marketing</td><td>No</td></tr>
             <tr><td>Analytics</td><td>No</td></tr>
             <tr><td>Product Personalization</td><td>No</td></tr>
-            <tr><td>App Functionality</td><td>On-device only (microphone for voice scroll; local script storage)</td></tr>
+            <tr><td>App Functionality</td><td>Yes. Microphone processing powers voice scrolling; local storage saves scripts; PRO's private CloudKit storage synchronizes scripts between the user's Apple devices.</td></tr>
             <tr><td>Other Purposes</td><td>No</td></tr>
         </table>
 
         <h2>Data Linked to You</h2>
-        <p>No data is linked to your identity. The App does not use accounts, logins, user IDs, device identifiers, or any other mechanism that could link data to you.</p>
+        <p>Lite does not link script content to an account. In PRO, Apple links synced script content to your iCloud account inside your private CloudKit database. The App has no separate login, and Pudu Digital does not receive your Apple ID, name, email address, or raw CloudKit account identifier.</p>
 
         <h2>Tracking</h2>
         <p>The App does <strong>not</strong> track you. It does not link data from the App with data from other companies' apps, websites, or offline properties for advertising or measurement purposes, nor does it share data with data brokers. The App does not use the AppTrackingTransparency framework because no tracking occurs.</p>
@@ -270,19 +273,20 @@
         <p>The App contains no third-party analytics SDKs, advertising frameworks, or ad networks. It includes Microsoft ONNX Runtime, an open-source library used only to run voice-detection processing on your device. ONNX Runtime does not receive, store, or transmit your microphone audio or other personal data. The App has no Pudu Digital server-side components.</p>
 
         <h2>Network Connections</h2>
-        <p>The App's teleprompter, script-storage, and voice-detection features work entirely on-device and do not communicate with Pudu Digital or any third-party server. Apple-provided StoreKit interfaces may connect directly to Apple when you view an App Store page or when iOS decides to show a rating prompt. Pudu Digital does not receive data from those connections.</p>
+        <p>Voice scrolling and microphone processing work entirely on-device. PRO connects directly to Apple's CloudKit service for Automatic iCloud Sync. Apple-provided StoreKit interfaces may also connect directly to Apple when you view an App Store page or when iOS decides to show a rating prompt. The App does not communicate with a Pudu Digital server.</p>
 
         <h2>Data Retention and Deletion</h2>
-        <p>Scripts are stored locally on your device until you delete them within the App. Microphone audio is processed in real time and immediately discarded — it is never saved. Uninstalling the App removes all locally stored data.</p>
+        <p>Scripts remain on your device until you delete them within the App or uninstall it. In PRO, synced copies remain in your private CloudKit database so they can be restored after reinstalling the App. Deleting a script while sync is enabled synchronizes that deletion. You can turn off Automatic iCloud Sync in the App; doing so stops future synchronization but does not automatically erase existing CloudKit copies. You can also manage the App's iCloud data through your Apple account settings.</p>
+        <p>Microphone audio is processed in real time and immediately discarded. It is never saved.</p>
 
         <h2>Children's Privacy</h2>
-        <p>The App does not collect personal information from any user, including children under the age of 13. Since no data is transmitted off-device, the App complies with COPPA and equivalent regulations.</p>
+        <p>The App does not knowingly collect personal information from children. It contains no advertising or tracking and has no separate account system. PRO's optional cloud storage uses the iCloud account and parental controls managed by Apple.</p>
 
         <h2>Your Rights and Control</h2>
-        <p>All data created by the App stays on your device and is fully under your control. Since we do not collect or store any data on our servers, there is no server-side data to request, export, or delete.</p>
+        <p>You can create, edit, export, and delete scripts in the App. PRO users can turn Automatic iCloud Sync on or off and manage the App's iCloud data through Apple account settings. Pudu Digital has no server-side copy of your scripts and no separate account data to request or delete.</p>
 
         <h2>Security</h2>
-        <p>All data remains on your device and is never transmitted over a network. Your scripts are protected by your device's own security features (passcode, Face ID, Touch ID).</p>
+        <p>Local scripts are protected by your device's security features, including its passcode, Face ID, or Touch ID. PRO's synchronized copies are stored in the user's private CloudKit database and protected by Apple's iCloud security.</p>
 
         <h2>Changes to This Policy</h2>
         <p>We may update this policy from time to time. Changes will be posted on this page with an updated effective date.</p>
