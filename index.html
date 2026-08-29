@@ -430,6 +430,16 @@
             line-height: 1.02;
             text-transform: uppercase;
         }
+        .section-link {
+            color: var(--accent);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(124, 255, 178, 0.45);
+            padding-bottom: 0.2rem;
+            transition: color 0.25s ease, border-color 0.25s ease;
+        }
+        .section-link:hover { color: var(--ink); border-color: var(--ink); }
 
         /* ---------- Apps ---------- */
         .apps { padding: 9rem 0; }
@@ -716,6 +726,7 @@
                             <span class="kicker reveal">/ 01 — The herd</span>
                             <h2 class="reveal">Meet the apps</h2>
                         </div>
+                        <a class="section-link" href="/voice-teleprompter/" data-hover>Compare Lite and PRO →</a>
                     </div>
                     <div class="app-grid">
                         <article class="app-card reveal" data-tilt>
